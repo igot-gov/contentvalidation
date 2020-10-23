@@ -49,7 +49,7 @@ public class OutboundRequestHandlerServiceImpl {
 		} catch (HttpClientErrorException e) {
 			logger.error("External Service threw an Exception: ", e);
 		} catch (Exception e) {
-			logger.error("Exception while posting the data in notification service: ", e);
+			logger.error("Exception while querying the external service: ", e);
 		}
 		return response;
 	}

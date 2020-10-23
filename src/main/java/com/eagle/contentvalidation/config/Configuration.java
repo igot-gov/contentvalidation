@@ -25,6 +25,6 @@ public class Configuration {
 	@Value("${profanity.service.host}")
 	private String profanityServiceHost;
 
-	@Value("${profanity.service.path")
+	@Value("${profanity.service.path}")
 	private String profanityServicePath;
 }
