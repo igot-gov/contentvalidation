@@ -2,11 +2,10 @@ package com.eagle.contentvalidation.service.impl;
 
 import com.eagle.contentvalidation.config.Configuration;
 import com.eagle.contentvalidation.config.Constants;
-import com.eagle.contentvalidation.model.Profanity;
-import com.eagle.contentvalidation.model.ProfanityClassification;
-import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
-import com.eagle.contentvalidation.model.ProfanityWordCount;
+import com.eagle.contentvalidation.model.*;
+import com.eagle.contentvalidation.service.ContentProviderService;
 import com.eagle.contentvalidation.service.ContentValidationService;
+import com.eagle.contentvalidation.util.CommonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.cos.COSName;
@@ -24,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,15 +42,27 @@ public class ContentValidationServiceImpl implements ContentValidationService {
     @Autowired
     private Configuration configuration;
 
-    public ProfanityResponseWrapper getTheProfanityCheckList() throws IOException {
-        File pdfFile = new File("/home/amit/Desktop/ProfanityCheck.pdf");
+    @Autowired
+    private ContentProviderService contentProviderService;
+
+    @Autowired
+    private CommonUtils commonUtils;
+
+    /**
+     * Get the profanity check list for pdf
+     *
+     * @param fileInputStream
+     * @return
+     * @throws IOException
+     */
+    public ProfanityResponseWrapper getTheProfanityCheckList(InputStream fileInputStream, HierarchyResponse hierarchyResponse) throws IOException {
         List<Profanity> profanityList = new ArrayList<>();
         ProfanityResponseWrapper profanityResponseWrapper = new ProfanityResponseWrapper();
         PDDocument doc = null;
         PDFTextStripper pdfStripper = null;
         String pageText = null;
         try {
-            doc = PDDocument.load(pdfFile);
+            doc = PDDocument.load(fileInputStream);
             int pageCount = doc.getPages().getCount();
             for (int i = 1; i <= pageCount; i++) {
                 pdfStripper = new PDFTextStripper();
@@ -64,13 +76,30 @@ public class ContentValidationServiceImpl implements ContentValidationService {
                     updateProfanityWordOccurence(profanityResponse, i, profanityResponseWrapper);
                 }
             }
+
             profanityResponseWrapper.setTotalPageUploaded(pageCount);
             profanityResponseWrapper.setProfanityList(profanityList);
+            profanityResponseWrapper.setFileName(commonUtils.getFileName(hierarchyResponse.getArtifactUrl()));
         } catch (IOException e) {
             log.error("Exception occured while reading the pdf file");
             throw new IOException(e);
         }
         return profanityResponseWrapper;
+    }
+
+    /**
+     *
+     * @param rootOrg
+     * @param org
+     * @param contentId
+     * @param userId
+     * @return Get the profanity response
+     */
+    @Override
+    public ProfanityResponseWrapper validateContent(String rootOrg, String org, String contentId, String userId) throws IOException {
+        HierarchyResponse hierarchyResponse = contentProviderService.getHeirarchyResponse(rootOrg, org, contentId, userId);
+        InputStream inputStream = contentProviderService.getContentFile(hierarchyResponse.getDownloadUrl());
+        return getTheProfanityCheckList(inputStream, hierarchyResponse);
     }
 
     /**

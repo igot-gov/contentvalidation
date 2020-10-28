@@ -16,15 +16,18 @@ public class Configuration {
 	@Value("${notify.service.path}")
 	private String notifyServicePath;
 
-	@Value("${s3.service.host}")
-	private String contentServiceHost;
-
-	@Value("${s3.service.path}")
-	private String contentServicePath;
-
 	@Value("${profanity.service.host}")
 	private String profanityServiceHost;
 
 	@Value("${profanity.service.path}")
 	private String profanityServicePath;
+
+	@Value("${lexcore.service.host}")
+	private String lexCoreServiceHost;
+
+	@Value("${lexcore.hierarchy.searchpath}")
+	private String heirarchySearchPath;
+
+	@Value("${content.service.host}")
+	private String contentServiceHost;
 }

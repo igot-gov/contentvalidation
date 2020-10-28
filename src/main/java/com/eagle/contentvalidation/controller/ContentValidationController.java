@@ -12,13 +12,15 @@ import java.io.IOException;
 @RequestMapping("/v1/")
 public class ContentValidationController {
 
-    @Autowired
-    private ContentValidationService contentValidationService;
+	@Autowired
+	private ContentValidationService contentValidationService;
 
-    @PostMapping("profanity/getprofanitychecklist")
-    public ResponseEntity<?> findRecommendedConnections() throws IOException {
-        Object response = contentValidationService.getTheProfanityCheckList();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+	@PostMapping("profanity/getprofanitychecklist/{contentId}/{userId}")
+	public ResponseEntity<?> findRecommendedConnections(@RequestHeader("rootOrg") String rootOrg,
+			@RequestHeader("org") String org, @PathVariable("contentId") String contentId,
+			@PathVariable("userId") String userId) throws IOException {
+		Object response = contentValidationService.validateContent(rootOrg, org, contentId, userId);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 
-    }
+	}
 }
