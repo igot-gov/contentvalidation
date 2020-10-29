@@ -16,7 +16,7 @@ public class ContentValidationController {
     @Autowired
     private ContentValidationService contentValidationService;
 
-    @PostMapping("profanity/checkProfanity/{contentId}/{userId}")
+    @PostMapping("checkProfanity/{contentId}/{userId}")
     public ResponseEntity<ProfanityResponseWrapper> findRecommendedConnections(@RequestHeader("rootOrg") String rootOrg,
                                                                                @RequestHeader("org") String org, @PathVariable("contentId") String contentId,
                                                                                @PathVariable("userId") String userId) throws IOException {
