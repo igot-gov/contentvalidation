@@ -34,14 +34,13 @@ public class ContentProviderServiceImpl implements ContentProviderService {
         }
         StringBuilder url = new StringBuilder(downloadUrl);
         byte[] byteStream = outboundRequestHandlerService.fetchByteStream(url);
-        InputStream targetStream = new ByteArrayInputStream(byteStream);
-        return targetStream;
+        return new ByteArrayInputStream(byteStream);
     }
 
     @Override
     public HierarchyResponse getHeirarchyResponse(String rootOrg, String org, String contentId, String userId) {
         StringBuilder url = new StringBuilder();
-        url.append(configuration.getHeirarchySearchPath().replace(Constants.CONTENT_ID_REPLACER, contentId)).append(configuration.getHeirarchySearchPath());
+        url.append(configuration.getLexCoreServiceHost()).append(configuration.getHeirarchySearchPath().replace(Constants.CONTENT_ID_REPLACER, contentId));
         HashMap<String, Object> request = new HashMap<>();
         request.put(Constants.ROOT_ORG_CONSTANT, rootOrg);
         request.put(Constants.ORG_CONSTANT, org);

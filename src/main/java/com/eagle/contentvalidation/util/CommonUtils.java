@@ -1,6 +1,5 @@
 package com.eagle.contentvalidation.util;
 
-import com.eagle.contentvalidation.config.Constants;
 import org.springframework.stereotype.Service;
 
 @Service

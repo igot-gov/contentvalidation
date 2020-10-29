@@ -6,6 +6,8 @@ import java.util.List;
 
 public class Constants {
 
+    private Constants() { }
+
     public static final String TEXT_FIELD_CONSTANT = "text";
 
     public static final List<String> MINIMUL_FIELDS = Collections.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType", "artifactUrl", "name", "status", "resourceType", "categoryType", "category"));
@@ -33,5 +35,16 @@ public class Constants {
     public static final String FIELDS_CONSTANT = "fields";
 
     public static final String DOWNLOAD_URL_PREFIX = "/apis/proxies/v8/";
+
+    public static final String SERVICE_ERROR_CONSTANT = "External Service threw an Exception:";
+
+    public static final String EXTERNAL_SERVICE_ERROR_CODE = "Exception while querying the external service:";
+
+    public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
+
+    public static final String REQUEST_CONSTANT = "Request: ";
+
+    public static final String URI_CONSTANT = "URI: ";
+
 
 }

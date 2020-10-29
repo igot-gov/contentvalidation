@@ -131,7 +131,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
      */
     private void extractImagesAndUpdateTheResponse(PDDocument doc, int index, ProfanityResponseWrapper responseWrapper)
             throws IOException {
-        PDPage page = (PDPage) doc.getPages().get(index - 1);
+        PDPage page = doc.getPages().get(index - 1);
         int totalImageOnthePage = 0;
         PDResources resources = page.getResources();
         for (COSName name : resources.getXObjectNames()) {
@@ -157,25 +157,25 @@ public class ContentValidationServiceImpl implements ContentValidationService {
      * @param responseWrapper
      */
     private void updateProfanityWordOccurence(Profanity profanity, int pageNo, ProfanityResponseWrapper responseWrapper) {
-        responseWrapper.setOverAllOffensivescore(responseWrapper.getOverAllOffensivescore() + profanity.getOverall_text_classification().getProbability());
-        if (profanity.getPossible_profane_word_count() > 0) {
+        responseWrapper.setOverAllOffensivescore(responseWrapper.getOverAllOffensivescore() + profanity.getOverallTextClassification().getProbability());
+        if (profanity.getPossibleProfaneWordCount() > 0) {
             HashMap<String, ProfanityWordCount> wordCountMap = responseWrapper.getProfanityClassifications();
             ProfanityWordCount wordCount = null;
-            int size = profanity.getPossible_profanity().size();
+            int size = profanity.getPossibleProfanity().size();
             for (int i = 0; i < size; i++) {
                 if (CollectionUtils.isEmpty(wordCountMap)) {
-                    wordCountMap = new HashMap<String, ProfanityWordCount>();
+                    wordCountMap = new HashMap<>();
                 }
-                if (ObjectUtils.isEmpty(wordCountMap.get(profanity.getPossible_profanity().get(i)))) {
+                if (ObjectUtils.isEmpty(wordCountMap.get(profanity.getPossibleProfanity().get(i)))) {
                     wordCount = new ProfanityWordCount();
-                    wordCount.setOffenceCategory(profanity.getOverall_text_classification().getClassification());
+                    wordCount.setOffenceCategory(profanity.getOverallTextClassification().getClassification());
                     wordCount.setOccurenceOnPage(new HashSet<>());
                     wordCount.getOccurenceOnPage().add(pageNo);
-                    wordCountMap.put(profanity.getPossible_profanity().get(i), wordCount);
+                    wordCountMap.put(profanity.getPossibleProfanity().get(i), wordCount);
                     responseWrapper.setProfanityWordCount(responseWrapper.getProfanityWordCount() + 1);
                 } else {
-                    wordCountMap.get(profanity.getPossible_profanity().get(i)).setOffenceCategory(profanity.getOverall_text_classification().getClassification());
-                    wordCountMap.get(profanity.getPossible_profanity().get(i)).getOccurenceOnPage().add(pageNo);
+                    wordCountMap.get(profanity.getPossibleProfanity().get(i)).setOffenceCategory(profanity.getOverallTextClassification().getClassification());
+                    wordCountMap.get(profanity.getPossibleProfanity().get(i)).getOccurenceOnPage().add(pageNo);
                 }
             }
             responseWrapper.setProfanityClassifications(wordCountMap);

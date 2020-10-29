@@ -9,16 +9,16 @@ import java.util.List;
 @Getter
 public class Profanity {
 
-    private String text_original;
+    private String textOriginal;
 
-    private String text_tagged;
+    private String textTagged;
 
-    private List<String> possible_profanity;
+    private List<String> possibleProfanity;
 
-    private Integer possible_profane_word_count;
+    private Integer possibleProfaneWordCount;
 
-    private List<ProfanityClassification> line_analysis;
+    private List<ProfanityClassification> lineAnalysis;
 
-    private ProfanityClassification overall_text_classification;
+    private ProfanityClassification overallTextClassification;
 
 }

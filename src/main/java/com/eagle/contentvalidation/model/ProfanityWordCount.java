@@ -9,9 +9,9 @@ import java.util.Set;
 @Getter
 public class ProfanityWordCount {
 
-    private String OffenceCategory;
+    private String offenceCategory;
 
-    private Set<Integer> OccurenceOnPage;
+    private Set<Integer> occurenceOnPage;
 
     private int totalWordCount;
 }
