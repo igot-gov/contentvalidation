@@ -1,13 +1,12 @@
 package com.eagle.contentvalidation.service.impl;
 
-import com.eagle.contentvalidation.config.Configuration;
-import com.eagle.contentvalidation.config.Constants;
-import com.eagle.contentvalidation.model.*;
-import com.eagle.contentvalidation.service.ContentProviderService;
-import com.eagle.contentvalidation.service.ContentValidationService;
-import com.eagle.contentvalidation.util.CommonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -21,13 +20,18 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.config.Constants;
+import com.eagle.contentvalidation.model.HierarchyResponse;
+import com.eagle.contentvalidation.model.Profanity;
+import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
+import com.eagle.contentvalidation.model.ProfanityWordCount;
+import com.eagle.contentvalidation.service.ContentProviderService;
+import com.eagle.contentvalidation.service.ContentValidationService;
+import com.eagle.contentvalidation.util.CommonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -55,7 +59,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
      * @return
      * @throws IOException
      */
-    public ProfanityResponseWrapper getTheProfanityCheckList(InputStream fileInputStream, HierarchyResponse hierarchyResponse) throws IOException {
+    private ProfanityResponseWrapper getTheProfanityCheckList(InputStream fileInputStream, HierarchyResponse hierarchyResponse) throws IOException {
         List<Profanity> profanityList = new ArrayList<>();
         ProfanityResponseWrapper profanityResponseWrapper = new ProfanityResponseWrapper();
         PDDocument doc = null;
@@ -133,7 +137,6 @@ public class ContentValidationServiceImpl implements ContentValidationService {
         for (COSName name : resources.getXObjectNames()) {
             PDXObject o = resources.getXObject(name);
             if (o instanceof PDImageXObject) {
-                PDImageXObject image = (PDImageXObject) o;
                 totalImageOnthePage++;
             }
         }
