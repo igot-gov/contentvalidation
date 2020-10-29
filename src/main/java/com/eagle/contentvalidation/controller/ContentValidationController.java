@@ -10,18 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/v1/")
+@RequestMapping("/v1")
 public class ContentValidationController {
 
-    @Autowired
-    private ContentValidationService contentValidationService;
+	@Autowired
+	private ContentValidationService contentValidationService;
 
-    @PostMapping("checkProfanity/{contentId}/{userId}")
-    public ResponseEntity<ProfanityResponseWrapper> findRecommendedConnections(@RequestHeader("rootOrg") String rootOrg,
-                                                                               @RequestHeader("org") String org, @PathVariable("contentId") String contentId,
-                                                                               @PathVariable("userId") String userId) throws IOException {
-        ProfanityResponseWrapper response = contentValidationService.validateContent(rootOrg, org, contentId, userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-
-    }
+	@PostMapping("/checkProfanity/{contentId}/{userId}")
+	public ResponseEntity<ProfanityResponseWrapper> checkContentProfanity(@RequestHeader("rootOrg") String rootOrg,
+			@RequestHeader("org") String org, @PathVariable("contentId") String contentId,
+			@PathVariable("userId") String userId) throws IOException {
+		ProfanityResponseWrapper response = contentValidationService.validateContent(rootOrg, org, contentId, userId);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }
