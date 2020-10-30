@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +36,7 @@ public class ContentValidationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/checkPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "/checkPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<ProfanityResponseWrapper> checkContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
