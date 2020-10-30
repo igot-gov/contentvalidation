@@ -1,16 +1,12 @@
 package com.eagle.contentvalidation.service.impl;
 
-import com.eagle.contentvalidation.config.Configuration;
-import com.eagle.contentvalidation.config.Constants;
-import com.eagle.contentvalidation.model.HierarchyResponse;
-import com.eagle.contentvalidation.model.Profanity;
-import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
-import com.eagle.contentvalidation.model.ProfanityWordCount;
-import com.eagle.contentvalidation.service.ContentProviderService;
-import com.eagle.contentvalidation.service.ContentValidationService;
-import com.eagle.contentvalidation.util.CommonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -24,12 +20,19 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.config.Constants;
+import com.eagle.contentvalidation.model.ContentPdfValidation;
+import com.eagle.contentvalidation.model.HierarchyResponse;
+import com.eagle.contentvalidation.model.Profanity;
+import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
+import com.eagle.contentvalidation.model.ProfanityWordCount;
+import com.eagle.contentvalidation.service.ContentProviderService;
+import com.eagle.contentvalidation.service.ContentValidationService;
+import com.eagle.contentvalidation.util.CommonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -57,7 +60,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
      * @return
      * @throws IOException
      */
-    private ProfanityResponseWrapper getTheProfanityCheckList(InputStream fileInputStream, HierarchyResponse hierarchyResponse) throws IOException {
+    private ProfanityResponseWrapper getTheProfanityCheckList(InputStream fileInputStream, String fileName) throws IOException {
         List<Profanity> profanityList = new ArrayList<>();
         ProfanityResponseWrapper profanityResponseWrapper = new ProfanityResponseWrapper();
         PDDocument doc = null;
@@ -81,7 +84,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 
             profanityResponseWrapper.setTotalPageUploaded(pageCount);
             profanityResponseWrapper.setProfanityList(profanityList);
-            profanityResponseWrapper.setFileName(commonUtils.getFileName(hierarchyResponse.getArtifactUrl()));
+            profanityResponseWrapper.setFileName(fileName);
         } catch (IOException e) {
             log.error("Exception occured while reading the pdf file");
             throw new IOException(e);
@@ -101,7 +104,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
     public ProfanityResponseWrapper validateContent(String rootOrg, String org, String contentId, String userId) throws IOException {
         HierarchyResponse hierarchyResponse = contentProviderService.getHeirarchyResponse(rootOrg, org, contentId, userId);
         InputStream inputStream = contentProviderService.getContentFile(hierarchyResponse.getDownloadUrl());
-        return getTheProfanityCheckList(inputStream, hierarchyResponse);
+        return getTheProfanityCheckList(inputStream, commonUtils.getFileName(hierarchyResponse.getArtifactUrl()));
     }
 
     /**
@@ -117,6 +120,14 @@ public class ContentValidationServiceImpl implements ContentValidationService {
         url.append(configuration.getProfanityServiceHost()).append(configuration.getProfanityServicePath());
         Object response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObject);
         return mapper.convertValue(response, Profanity.class);
+    }
+    
+
+    
+    public ProfanityResponseWrapper validatePdfContent(ContentPdfValidation contentPdfValidation) throws IOException {
+    	InputStream inputStream = contentProviderService.getContentFile(contentPdfValidation.getPdfDownloadUrl());
+    	String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
+    	return getTheProfanityCheckList(inputStream, fileName);
     }
 
     /**
