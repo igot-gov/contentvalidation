@@ -45,6 +45,10 @@ public class Constants {
     public static final String REQUEST_CONSTANT = "Request: ";
 
     public static final String URI_CONSTANT = "URI: ";
+    
+    public static final String WORD_CONSTANT = "word";
+    
+    public static final String NO_OF_OCCURRENCE_CONSTANT = "no_of_occurrence";
 
 
 }

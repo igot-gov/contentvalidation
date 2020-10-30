@@ -1,12 +1,16 @@
 package com.eagle.contentvalidation.service.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
+import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.config.Constants;
+import com.eagle.contentvalidation.model.HierarchyResponse;
+import com.eagle.contentvalidation.model.Profanity;
+import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
+import com.eagle.contentvalidation.model.ProfanityWordCount;
+import com.eagle.contentvalidation.service.ContentProviderService;
+import com.eagle.contentvalidation.service.ContentValidationService;
+import com.eagle.contentvalidation.util.CommonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -20,18 +24,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import com.eagle.contentvalidation.config.Configuration;
-import com.eagle.contentvalidation.config.Constants;
-import com.eagle.contentvalidation.model.HierarchyResponse;
-import com.eagle.contentvalidation.model.Profanity;
-import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
-import com.eagle.contentvalidation.model.ProfanityWordCount;
-import com.eagle.contentvalidation.service.ContentProviderService;
-import com.eagle.contentvalidation.service.ContentValidationService;
-import com.eagle.contentvalidation.util.CommonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -161,24 +159,28 @@ public class ContentValidationServiceImpl implements ContentValidationService {
         if (profanity.getPossible_profane_word_count() > 0) {
             HashMap<String, ProfanityWordCount> wordCountMap = responseWrapper.getProfanityClassifications();
             ProfanityWordCount wordCount = null;
-            int size = profanity.getPossible_profanity().size();
+            int size = profanity.getPossible_profanity_frequency().size();
             for (int i = 0; i < size; i++) {
                 if (CollectionUtils.isEmpty(wordCountMap)) {
                     wordCountMap = new HashMap<>();
                 }
-                if (ObjectUtils.isEmpty(wordCountMap.get(profanity.getPossible_profanity().get(i)))) {
+                String profaneWord = (String) profanity.getPossible_profanity_frequency().get(i).get(Constants.WORD_CONSTANT);
+                Integer totalWordCount = (Integer) profanity.getPossible_profanity_frequency().get(i).get(Constants.NO_OF_OCCURRENCE_CONSTANT);
+                if (ObjectUtils.isEmpty(wordCountMap.get(profaneWord))) {
                     wordCount = new ProfanityWordCount();
                     wordCount.setOffenceCategory(profanity.getOverall_text_classification().getClassification());
                     wordCount.setOccurenceOnPage(new HashSet<>());
                     wordCount.getOccurenceOnPage().add(pageNo);
-                    wordCountMap.put(profanity.getPossible_profanity().get(i), wordCount);
+                    wordCount.setTotalWordCount(totalWordCount);
+                    wordCountMap.put(profaneWord, wordCount);
                     responseWrapper.setProfanityWordCount(responseWrapper.getProfanityWordCount() + 1);
                 } else {
-                    wordCountMap.get(profanity.getPossible_profanity().get(i)).setOffenceCategory(profanity.getOverall_text_classification().getClassification());
-                    wordCountMap.get(profanity.getPossible_profanity().get(i)).getOccurenceOnPage().add(pageNo);
+                    wordCountMap.get(profaneWord).setOffenceCategory(profanity.getOverall_text_classification().getClassification());
+                    wordCountMap.get(profaneWord).getOccurenceOnPage().add(pageNo);
                 }
             }
             responseWrapper.setProfanityClassifications(wordCountMap);
         }
     }
+  
 }
