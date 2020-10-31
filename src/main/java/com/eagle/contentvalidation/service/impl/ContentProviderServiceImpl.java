@@ -32,8 +32,7 @@ public class ContentProviderServiceImpl implements ContentProviderService {
         if (downloadUrl.contains(Constants.DOWNLOAD_URL_PREFIX)) {
             downloadUrl = downloadUrl.replace(Constants.DOWNLOAD_URL_PREFIX, configuration.getContentServiceHost());
         }
-        StringBuilder url = new StringBuilder(downloadUrl);
-        byte[] byteStream = outboundRequestHandlerService.fetchByteStream(url);
+        byte[] byteStream = outboundRequestHandlerService.fetchByteStream(downloadUrl);
         return new ByteArrayInputStream(byteStream);
     }
 
@@ -49,7 +48,7 @@ public class ContentProviderServiceImpl implements ContentProviderService {
         request.put(Constants.FETCH_ONE_LEVEL_CONSTANT, Constants.FETCH_ON_LEVEL);
         request.put(Constants.SKIP_ACCESS_CHECK_CONSTANT, Constants.SKIP_ACCESS_CHECK);
         request.put(Constants.FIELDS_CONSTANT, Constants.MINIMUL_FIELDS);
-        Object recieviedResponse = outboundRequestHandlerService.fetchResultUsingPost(url, request);
+        Object recieviedResponse = outboundRequestHandlerService.fetchResultUsingPost(url.toString(), request);
         HierarchyResponse response = mapper.convertValue(recieviedResponse, HierarchyResponse.class);
         if (ObjectUtils.isEmpty(response) || StringUtils.isEmpty(response.getDownloadUrl())) {
             throw new NoSuchElementException();

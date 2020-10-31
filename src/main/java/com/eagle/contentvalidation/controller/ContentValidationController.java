@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eagle.contentvalidation.model.ContentPdfValidation;
+import com.eagle.contentvalidation.model.ContentPdfValidationResponse;
 import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
 import com.eagle.contentvalidation.service.ContentValidationService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -37,11 +38,11 @@ public class ContentValidationController {
 	}
 
 	@PostMapping(value = "/checkPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<ProfanityResponseWrapper> checkContentPdfProfanity(
+	public ResponseEntity<ContentPdfValidationResponse> checkContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-		ProfanityResponseWrapper response = contentValidationService
+		ContentPdfValidationResponse response = contentValidationService
 				.validatePdfContent(mapper.convertValue(contentPdfValidation, ContentPdfValidation.class));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
