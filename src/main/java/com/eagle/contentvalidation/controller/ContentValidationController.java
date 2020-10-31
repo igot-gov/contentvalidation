@@ -46,4 +46,11 @@ public class ContentValidationController {
 				.validatePdfContent(mapper.convertValue(contentPdfValidation, ContentPdfValidation.class));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+	@PostMapping(value = "/checkLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<ContentPdfValidationResponse> checkLocalContentPdfProfanity(
+			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
+		return new ResponseEntity<>(contentValidationService.validateLocalPdfContent(contentPdfValidation),
+				HttpStatus.OK);
+	}
 }

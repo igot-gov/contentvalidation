@@ -1,5 +1,9 @@
 package com.eagle.contentvalidation.service.impl;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -7,8 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -37,13 +39,11 @@ import com.eagle.contentvalidation.service.ContentValidationService;
 import com.eagle.contentvalidation.util.CommonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 @Service
-@Slf4j
+@Log4j2
 public class ContentValidationServiceImpl implements ContentValidationService {
-
-	Logger logger = LogManager.getLogger(ContentValidationServiceImpl.class);
 
 	@Autowired
 	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
@@ -141,12 +141,44 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	 */
 	public ContentPdfValidationResponse validatePdfContent(ContentPdfValidation contentPdfValidation)
 			throws IOException {
+		StringBuilder logStr = null;
+		if (log.isDebugEnabled()) {
+			logStr = new StringBuilder();
+			logStr.append("ValidatePDFContent request: ").append(mapper.writeValueAsString(contentPdfValidation));
+		}
 		long startTime = System.currentTimeMillis();
 		InputStream inputStream = contentProviderService.getContentFile(contentPdfValidation.getPdfDownloadUrl());
-		logger.info("Time taken to download PDF File: {} milliseconds", System.currentTimeMillis() - startTime);
+		if (logStr != null) {
+			logStr.append("Time taken to download PDF File: ").append(System.currentTimeMillis() - startTime)
+					.append(" milliseconds");
+		}
 		String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
 		ContentPdfValidationResponse response = performProfanityAnalysis(inputStream, fileName);
-		logger.info("Time take to validate PDF Content: {} milliseconds", System.currentTimeMillis() - startTime);
+		if (logStr != null) {
+			logStr.append("Time take to validate PDF Content: ").append(System.currentTimeMillis() - startTime)
+					.append(" milliseconds");
+			log.debug(logStr.toString());
+		}
+		return response;
+	}
+
+	public ContentPdfValidationResponse validateLocalPdfContent(ContentPdfValidation contentPdfValidation)
+			throws FileNotFoundException, IOException {
+		if (log.isDebugEnabled()) {
+			log.debug("validateLocalPdfContent request: {}", mapper.writeValueAsString(contentPdfValidation));
+		}
+		long startTime = System.currentTimeMillis();
+		File pdfFile = new File(contentPdfValidation.getPdfDownloadUrl());
+		ContentPdfValidationResponse response = new ContentPdfValidationResponse();
+		if (pdfFile.exists()) {
+			response = performProfanityAnalysis(new DataInputStream(new FileInputStream(pdfFile)), pdfFile.getName());
+		} else {
+			log.error("File doesn't exist at path: {}", contentPdfValidation.getPdfDownloadUrl());
+		}
+		if (log.isDebugEnabled()) {
+			log.debug("Time take to validate PDF Content: {} milliseconds", System.currentTimeMillis() - startTime);
+			log.debug("ContentPdfValidationResponse: {}", mapper.writeValueAsString(response));
+		}
 		return response;
 	}
 
@@ -198,7 +230,8 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 					wordCountMap = new HashMap<>();
 				}
 				String profaneWord = (String) profanity.getPossible_profanity_frequency().get(i).getWord();
-				Integer totalWordCount = (Integer) profanity.getPossible_profanity_frequency().get(i).getNo_of_occurrence();
+				Integer totalWordCount = (Integer) profanity.getPossible_profanity_frequency().get(i)
+						.getNo_of_occurrence();
 				if (ObjectUtils.isEmpty(wordCountMap.get(profaneWord))) {
 					wordCount = new ProfanityWordCount();
 					wordCount.setOffenceCategory(profanity.getOverall_text_classification().getClassification());
@@ -229,25 +262,49 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		for (int p = 0; p < docPages.size(); p++) {
 			long startTime = System.currentTimeMillis();
 			pdfStripper = new PDFTextStripper();
+			pdfStripper.setAddMoreFormatting(false);
+			pdfStripper.setLineSeparator(" ");
 			String text = pdfStripper.getText(docPages.get(p));
 			if (!StringUtils.isEmpty(text)) {
 				Profanity profanityResponse = getProfanityCheckForText(text);
+				if (log.isDebugEnabled()) {
+					log.debug("Page wise analysis PageNo: {}, Analysis: {}", p,
+							mapper.writeValueAsString(profanityResponse));
+				}
 				response.incrementTotalPages();
 				for (ProfanityWordFrequency wordFrequency : profanityResponse.getPossible_profanity_frequency()) {
-					wordFrequency.addPageOccurred(p);
+					wordFrequency.addPageOccurred(getPageNumberForIndex(p));
 					response.addProfanityWordDetails(wordFrequency);
 					response.incrementProfanityWordCount();
 				}
 				overAllClassification += profanityResponse.getOverall_text_classification().getProbability();
+				if (StringUtils.isEmpty(response.getOverall_text_classification())) {
+					response.setOverall_text_classification(
+							profanityResponse.getOverall_text_classification().getClassification());
+				} else {
+					response.setOverall_text_classification(
+							commonUtils.getProfanityClassification(response.getOverall_text_classification(),
+									profanityResponse.getOverall_text_classification().getClassification()));
+				}
 			}
 			long perPageTime = System.currentTimeMillis() - startTime;
-			logger.info("Time taken to perform Profanity Analysis for this page: {} milliseconds", perPageTime);
+
+			if (log.isDebugEnabled()) {
+				log.debug("Time taken to perform Profanity Analysis for page {} is {} milliseconds",
+						getPageNumberForIndex(p), perPageTime);
+			}
 			totalTime += perPageTime;
 		}
-		response.setScore(overAllClassification / docPages.size());
-		logger.info("Time taken to perform Profanity Analysis for this dpcument: {} milliseconds", totalTime);
+		response.setScore(overAllClassification / new Double(docPages.size()));
+		if (log.isDebugEnabled()) {
+			log.debug("Time taken to perform Profanity Analysis for document {} is {} milliseconds", fileName,
+					totalTime);
+		}
 		response.setPdfFileName(fileName);
 		return response;
 	}
 
+	private int getPageNumberForIndex(int index) {
+		return ++index;
+	}
 }

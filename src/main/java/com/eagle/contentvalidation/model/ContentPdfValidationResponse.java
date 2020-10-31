@@ -16,6 +16,7 @@ public class ContentPdfValidationResponse {
 	private double score;
 	private String pdfFileName;
 	private String image_occurances;
+	private String overall_text_classification;
 	private List<ProfanityWordFrequency> profanityWordList = Collections.emptyList();
 
 	public void incrementTotalPages() {

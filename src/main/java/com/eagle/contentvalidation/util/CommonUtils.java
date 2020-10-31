@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Service;
 
+import com.eagle.contentvalidation.model.ProfanityLevelClassification;
+
 @Service
 public class CommonUtils {
 
@@ -83,6 +85,18 @@ public class CommonUtils {
 				throw new IllegalArgumentException("Null byte present in file/path name. There are no "
 						+ "known legitimate use cases for such data, but several injection attacks may use it");
 			}
+		}
+	}
+
+	public String getProfanityClassification(String currentValue, String newValue) {
+		ProfanityLevelClassification newProfanityLevel = ProfanityLevelClassification.getLevelByName(newValue);
+		ProfanityLevelClassification currentProfanityLevel = ProfanityLevelClassification.getLevelByName(currentValue);
+
+		int compareValue = currentProfanityLevel.compareTo(newProfanityLevel);
+		if (compareValue <= 0) {
+			return newProfanityLevel.getLevelName();
+		} else {
+			return currentProfanityLevel.getLevelName();
 		}
 	}
 }
