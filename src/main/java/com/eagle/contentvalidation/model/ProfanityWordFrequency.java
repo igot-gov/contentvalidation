@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProfanityWordFrequency {
-	private int no_of_occurance;
+	private int no_of_occurrence;
 	private Set<Integer> pageOccurred = Collections.emptySet();
 	private String word;
 	private String level;

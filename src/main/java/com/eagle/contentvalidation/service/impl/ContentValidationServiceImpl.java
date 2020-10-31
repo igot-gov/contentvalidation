@@ -198,8 +198,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 					wordCountMap = new HashMap<>();
 				}
 				String profaneWord = (String) profanity.getPossible_profanity_frequency().get(i).getWord();
-				Integer totalWordCount = (Integer) profanity.getPossible_profanity_frequency().get(i)
-						.getNo_of_occurance();
+				Integer totalWordCount = (Integer) profanity.getPossible_profanity_frequency().get(i).getNo_of_occurrence();
 				if (ObjectUtils.isEmpty(wordCountMap.get(profaneWord))) {
 					wordCount = new ProfanityWordCount();
 					wordCount.setOffenceCategory(profanity.getOverall_text_classification().getClassification());
@@ -232,9 +231,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			pdfStripper = new PDFTextStripper();
 			String text = pdfStripper.getText(docPages.get(p));
 			if (!StringUtils.isEmpty(text)) {
-
 				Profanity profanityResponse = getProfanityCheckForText(text);
-
 				response.incrementTotalPages();
 				for (ProfanityWordFrequency wordFrequency : profanityResponse.getPossible_profanity_frequency()) {
 					wordFrequency.addPageOccurred(p);
@@ -243,9 +240,9 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				}
 				overAllClassification += profanityResponse.getOverall_text_classification().getProbability();
 			}
-			long endTime = System.currentTimeMillis();
-			logger.info("Time taken to perform Profanity Analysis for this page: {} milliseconds", endTime);
-			totalTime += endTime - startTime;
+			long perPageTime = System.currentTimeMillis() - startTime;
+			logger.info("Time taken to perform Profanity Analysis for this page: {} milliseconds", perPageTime);
+			totalTime += perPageTime;
 		}
 		response.setScore(overAllClassification / docPages.size());
 		logger.info("Time taken to perform Profanity Analysis for this dpcument: {} milliseconds", totalTime);
