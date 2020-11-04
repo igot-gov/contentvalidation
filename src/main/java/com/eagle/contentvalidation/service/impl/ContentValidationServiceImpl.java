@@ -163,7 +163,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	}
 
 	public ContentPdfValidationResponse validateLocalPdfContent(ContentPdfValidation contentPdfValidation)
-			throws FileNotFoundException, IOException {
+			throws IOException {
 		if (log.isDebugEnabled()) {
 			log.debug("validateLocalPdfContent request: {}", mapper.writeValueAsString(contentPdfValidation));
 		}
@@ -229,7 +229,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				if (CollectionUtils.isEmpty(wordCountMap)) {
 					wordCountMap = new HashMap<>();
 				}
-				String profaneWord = (String) profanity.getPossible_profanity_frequency().get(i).getWord();
+				String profaneWord = profanity.getPossible_profanity_frequency().get(i).getWord();
 				Integer totalWordCount = (Integer) profanity.getPossible_profanity_frequency().get(i)
 						.getNo_of_occurrence();
 				if (ObjectUtils.isEmpty(wordCountMap.get(profaneWord))) {
@@ -295,7 +295,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			}
 			totalTime += perPageTime;
 		}
-		response.setScore(overAllClassification / new Double(docPages.size()));
+		response.setScore(overAllClassification / (double) docPages.size());
 		if (log.isDebugEnabled()) {
 			log.debug("Time taken to perform Profanity Analysis for document {} is {} milliseconds", fileName,
 					totalTime);

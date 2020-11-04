@@ -16,5 +16,5 @@ public interface ContentValidationService {
 			throws IOException;
 
 	public ContentPdfValidationResponse validateLocalPdfContent(ContentPdfValidation contentPdfValidation)
-			throws FileNotFoundException, IOException;
+			throws IOException;
 }

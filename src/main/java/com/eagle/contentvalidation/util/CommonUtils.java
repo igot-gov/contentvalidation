@@ -1,10 +1,7 @@
 package com.eagle.contentvalidation.util;
 
-import java.util.Collection;
-
-import org.springframework.stereotype.Service;
-
 import com.eagle.contentvalidation.model.ProfanityLevelClassification;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CommonUtils {

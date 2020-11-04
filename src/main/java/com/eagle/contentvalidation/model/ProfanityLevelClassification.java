@@ -8,9 +8,9 @@ public enum ProfanityLevelClassification {
 	NOT_OFFENSIVE("Not Offensive", 1), OFFENSIVE("Offensive", 2), EXTREMELY_OFFENSIVE("Extremely Offensive", 3),
 	UNDEFINED("Undefined", 4);
 
-	private static final Map<String, ProfanityLevelClassification> BY_LEVEL_NAME = new HashMap<String, ProfanityLevelClassification>(
+	private static final Map<String, ProfanityLevelClassification> BY_LEVEL_NAME = new HashMap<>(
 			3);
-	private static final Map<Integer, ProfanityLevelClassification> BY_LEVEL_WEIGHT = new HashMap<Integer, ProfanityLevelClassification>(
+	private static final Map<Integer, ProfanityLevelClassification> BY_LEVEL_WEIGHT = new HashMap<>(
 			3);
 
 	static {

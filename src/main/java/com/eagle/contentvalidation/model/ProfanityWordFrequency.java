@@ -18,7 +18,7 @@ public class ProfanityWordFrequency {
 
 	public void addPageOccurred(int page) {
 		if (pageOccurred.isEmpty()) {
-			pageOccurred = new HashSet<Integer>();
+			pageOccurred = new HashSet<>();
 		}
 		pageOccurred.add(page);
 	}

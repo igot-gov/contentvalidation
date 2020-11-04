@@ -29,7 +29,7 @@ public class ContentPdfValidationResponse {
 
 	public void addProfanityWordDetails(ProfanityWordFrequency profanityWord) {
 		if (profanityWordList.isEmpty()) {
-			profanityWordList = new ArrayList<ProfanityWordFrequency>();
+			profanityWordList = new ArrayList<>();
 		}
 		profanityWordList.add(profanityWord);
 	}
