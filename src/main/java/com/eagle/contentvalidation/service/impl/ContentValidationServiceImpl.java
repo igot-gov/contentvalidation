@@ -1,16 +1,13 @@
 package com.eagle.contentvalidation.service.impl;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
+import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.config.Constants;
+import com.eagle.contentvalidation.model.*;
+import com.eagle.contentvalidation.service.ContentProviderService;
+import com.eagle.contentvalidation.service.ContentValidationService;
+import com.eagle.contentvalidation.util.CommonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.log4j.Log4j2;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -25,21 +22,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import com.eagle.contentvalidation.config.Configuration;
-import com.eagle.contentvalidation.config.Constants;
-import com.eagle.contentvalidation.model.ContentPdfValidation;
-import com.eagle.contentvalidation.model.ContentPdfValidationResponse;
-import com.eagle.contentvalidation.model.HierarchyResponse;
-import com.eagle.contentvalidation.model.Profanity;
-import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
-import com.eagle.contentvalidation.model.ProfanityWordCount;
-import com.eagle.contentvalidation.model.ProfanityWordFrequency;
-import com.eagle.contentvalidation.service.ContentProviderService;
-import com.eagle.contentvalidation.service.ContentValidationService;
-import com.eagle.contentvalidation.util.CommonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.log4j.Log4j2;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 @Service
 @Log4j2

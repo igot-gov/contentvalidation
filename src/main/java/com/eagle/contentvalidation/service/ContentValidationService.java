@@ -1,11 +1,10 @@
 package com.eagle.contentvalidation.service;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import com.eagle.contentvalidation.model.ContentPdfValidation;
 import com.eagle.contentvalidation.model.ContentPdfValidationResponse;
 import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
+
+import java.io.IOException;
 
 public interface ContentValidationService {
 
