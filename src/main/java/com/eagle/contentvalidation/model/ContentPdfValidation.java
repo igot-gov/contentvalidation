@@ -8,4 +8,10 @@ import lombok.Setter;
 public class ContentPdfValidation {
 
 	private String pdfDownloadUrl;
+	private String contentId;
+	private String fileName;
+
+	public String toString() {
+		return "PdfDownloadURL: " + pdfDownloadUrl + ", ContentId: " + contentId + ", FileName: " + fileName;
+	}
 }

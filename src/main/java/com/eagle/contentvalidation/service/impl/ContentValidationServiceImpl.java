@@ -1,13 +1,15 @@
 package com.eagle.contentvalidation.service.impl;
 
-import com.eagle.contentvalidation.config.Configuration;
-import com.eagle.contentvalidation.config.Constants;
-import com.eagle.contentvalidation.model.*;
-import com.eagle.contentvalidation.service.ContentProviderService;
-import com.eagle.contentvalidation.service.ContentValidationService;
-import com.eagle.contentvalidation.util.CommonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.log4j.Log4j2;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -22,11 +24,23 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.config.Constants;
+import com.eagle.contentvalidation.model.ContentPdfValidation;
+import com.eagle.contentvalidation.model.HierarchyResponse;
+import com.eagle.contentvalidation.model.Profanity;
+import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
+import com.eagle.contentvalidation.model.ProfanityWordCount;
+import com.eagle.contentvalidation.model.ProfanityWordFrequency;
+import com.eagle.contentvalidation.repo.ContentValidationRepoServiceImpl;
+import com.eagle.contentvalidation.repo.model.PdfDocValidationResponse;
+import com.eagle.contentvalidation.repo.model.PdfDocValidationResponsePrimaryKey;
+import com.eagle.contentvalidation.service.ContentProviderService;
+import com.eagle.contentvalidation.service.ContentValidationService;
+import com.eagle.contentvalidation.util.CommonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
@@ -43,6 +57,9 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 
 	@Autowired
 	private ContentProviderService contentProviderService;
+
+	@Autowired
+	ContentValidationRepoServiceImpl repoService;
 
 	@Autowired
 	private CommonUtils commonUtils;
@@ -126,7 +143,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	 * 
 	 * @return Returns the validation details of the given PDF file
 	 */
-	public ContentPdfValidationResponse validatePdfContent(ContentPdfValidation contentPdfValidation)
+	public PdfDocValidationResponse validatePdfContent(ContentPdfValidation contentPdfValidation)
 			throws IOException {
 		StringBuilder logStr = null;
 		if (log.isDebugEnabled()) {
@@ -140,7 +157,8 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 					.append(" milliseconds");
 		}
 		String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
-		ContentPdfValidationResponse response = performProfanityAnalysis(inputStream, fileName);
+		PdfDocValidationResponse response = performProfanityAnalysis(inputStream, fileName,
+				contentPdfValidation.getContentId());
 		if (logStr != null) {
 			logStr.append("Time take to validate PDF Content: ").append(System.currentTimeMillis() - startTime)
 					.append(" milliseconds");
@@ -149,16 +167,17 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		return response;
 	}
 
-	public ContentPdfValidationResponse validateLocalPdfContent(ContentPdfValidation contentPdfValidation)
+	public PdfDocValidationResponse validateLocalPdfContent(ContentPdfValidation contentPdfValidation)
 			throws IOException {
 		if (log.isDebugEnabled()) {
 			log.debug("validateLocalPdfContent request: {}", mapper.writeValueAsString(contentPdfValidation));
 		}
 		long startTime = System.currentTimeMillis();
 		File pdfFile = new File(contentPdfValidation.getPdfDownloadUrl());
-		ContentPdfValidationResponse response = new ContentPdfValidationResponse();
+		PdfDocValidationResponse response = new PdfDocValidationResponse();
 		if (pdfFile.exists()) {
-			response = performProfanityAnalysis(new DataInputStream(new FileInputStream(pdfFile)), pdfFile.getName());
+			response = performProfanityAnalysis(new DataInputStream(new FileInputStream(pdfFile)), pdfFile.getName(),
+					contentPdfValidation.getContentId());
 		} else {
 			log.error("File doesn't exist at path: {}", contentPdfValidation.getPdfDownloadUrl());
 		}
@@ -237,9 +256,10 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		}
 	}
 
-	private ContentPdfValidationResponse performProfanityAnalysis(InputStream inputStream, String fileName)
-			throws IOException {
-		ContentPdfValidationResponse response = new ContentPdfValidationResponse();
+	private PdfDocValidationResponse performProfanityAnalysis(InputStream inputStream, String fileName,
+			String contentId) throws IOException {
+		PdfDocValidationResponse response = new PdfDocValidationResponse();
+		response.setPrimaryKey(PdfDocValidationResponsePrimaryKey.builder().contentId(contentId).pdfFileName(fileName).build());
 		PDDocument doc = PDDocument.load(inputStream);
 		Splitter splitter = new Splitter();
 		List<PDDocument> docPages = splitter.split(doc);
@@ -261,7 +281,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				response.incrementTotalPages();
 				for (ProfanityWordFrequency wordFrequency : profanityResponse.getPossible_profanity_frequency()) {
 					wordFrequency.addPageOccurred(getPageNumberForIndex(p));
-					response.addProfanityWordDetails(wordFrequency);
+					response.addProfanityWordFrequency(wordFrequency);
 					response.incrementProfanityWordCount();
 				}
 				overAllClassification += profanityResponse.getOverall_text_classification().getProbability();
@@ -281,13 +301,14 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 						getPageNumberForIndex(p), perPageTime);
 			}
 			totalTime += perPageTime;
+			repoService.updateContentValidationResult(response, false);
 		}
 		response.setScore(overAllClassification / (double) docPages.size());
 		if (log.isDebugEnabled()) {
 			log.debug("Time taken to perform Profanity Analysis for document {} is {} milliseconds", fileName,
 					totalTime);
 		}
-		response.setPdfFileName(fileName);
+		repoService.updateContentValidationResult(response, true);
 		return response;
 	}
 

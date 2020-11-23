@@ -30,4 +30,7 @@ public class Configuration {
 
 	@Value("${content.service.host}")
 	private String contentServiceHost;
+	
+	@Value("${kafka.topics.incoming.rest.validation}")
+	private String startContentValidationTopic;
 }

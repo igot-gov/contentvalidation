@@ -20,7 +20,7 @@ public class Profanity {
 
 	private Integer possible_profane_word_count;
 
-	private List<ProfanityClassification> line_analysis;
+	private List<ProfanityLineClassification> line_analysis;
 
 	private ProfanityClassification overall_text_classification;
 

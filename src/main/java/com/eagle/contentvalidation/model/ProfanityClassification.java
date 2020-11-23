@@ -9,7 +9,7 @@ public class ProfanityClassification {
 
     private String classification;
 
-    private String line;
+    private String text;
 
     private Double probability;
 }

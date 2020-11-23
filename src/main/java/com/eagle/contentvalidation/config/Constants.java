@@ -46,6 +46,8 @@ public class Constants {
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 
 	public static final String REQUEST_CONSTANT = "Request: ";
+	
+	public static final String RESPONSE_CONSTANT = "Response: ";
 
 	public static final String URI_CONSTANT = "URI: ";
 
