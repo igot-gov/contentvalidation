@@ -69,7 +69,7 @@ public class ContentValidationController {
 		return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
 	}
 
-	@GetMapping(value = "/getPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "/getPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<PdfDocValidationResponse> getContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) {
 		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(
@@ -83,7 +83,7 @@ public class ContentValidationController {
 		return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
 	}
 
-	@GetMapping(value = "/getLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "/getLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<PdfDocValidationResponse> getLocalContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) {
 		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(
