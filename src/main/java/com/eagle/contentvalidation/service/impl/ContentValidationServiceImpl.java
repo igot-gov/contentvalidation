@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.multipdf.Splitter;
@@ -29,6 +30,7 @@ import com.eagle.contentvalidation.config.Constants;
 import com.eagle.contentvalidation.model.ContentPdfValidation;
 import com.eagle.contentvalidation.model.HierarchyResponse;
 import com.eagle.contentvalidation.model.Profanity;
+import com.eagle.contentvalidation.model.ProfanityCategorial;
 import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
 import com.eagle.contentvalidation.model.ProfanityWordCount;
 import com.eagle.contentvalidation.model.ProfanityWordFrequency;
@@ -303,6 +305,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				}
 			}
 			response.incrementTotalPages();
+			extractImagesAndUpdateThPdfeResponse(doc.getPages().get(p), p, response);
 			long perPageTime = System.currentTimeMillis() - startTime;
 
 			if (log.isDebugEnabled()) {
@@ -323,5 +326,27 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 
 	private int getPageNumberForIndex(int index) {
 		return ++index;
+	}
+
+	/**
+	 *
+	 * @param page
+	 * @param index
+	 * @param response
+	 */
+	private void extractImagesAndUpdateThPdfeResponse(PDPage page, int index, PdfDocValidationResponse response) {
+		PDResources resources = page.getResources();
+		try {
+			for (COSName name : resources.getXObjectNames()) {
+				PDXObject o = null;
+				o = resources.getXObject(name);
+				if (o instanceof PDImageXObject) {
+					response.incrementTotalPagesImages();
+					response.addImageOccurances(index);
+				}
+			}
+		} catch (IOException e) {
+			log.error("Error occured : {}", e);
+		}
 	}
 }

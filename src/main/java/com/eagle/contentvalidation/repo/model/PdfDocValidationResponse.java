@@ -11,6 +11,7 @@ import com.eagle.contentvalidation.model.ProfanityWordFrequency;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.util.StringUtils;
 
 @Table("pdf_validation_response")
 @Getter
@@ -68,6 +69,14 @@ public class PdfDocValidationResponse {
 		}
 	}
 
+	public void incrementTotalPagesImages(){
+		if (total_page_images == null) {
+			total_page_images = 1;
+		} else {
+			total_page_images++;
+		}
+	}
+
 	public void incrementProfanityWordCount() {
 		if (profanity_word_count == null) {
 			profanity_word_count = 1;
@@ -75,4 +84,14 @@ public class PdfDocValidationResponse {
 			profanity_word_count++;
 		}
 	}
+
+	public void addImageOccurances(int pageIndex) {
+		if (StringUtils.isEmpty(this.image_occurances)) {
+			this.image_occurances = String.valueOf(pageIndex+1);
+		} else {
+			this.image_occurances = this.image_occurances + ", " + String.valueOf(pageIndex+1);
+		}
+	}
+
+
 }

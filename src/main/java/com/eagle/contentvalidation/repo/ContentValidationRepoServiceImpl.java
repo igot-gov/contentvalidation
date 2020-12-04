@@ -49,6 +49,7 @@ public class ContentValidationRepoServiceImpl {
 			responseExisting.setCompleted(isCompleted);
 			responseExisting.setTotal_page_images(newResponse.getTotal_page_images());
 			responseExisting.setProfanityWordList(newResponse.getProfanityWordList());
+			responseExisting.setImage_occurances(newResponse.getImage_occurances());
 
 			pdfRepo.save(responseExisting);
 		} else {
