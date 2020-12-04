@@ -2,6 +2,7 @@ package com.eagle.contentvalidation.util;
 
 import com.eagle.contentvalidation.model.ProfanityLevelClassification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class CommonUtils {
@@ -95,5 +96,10 @@ public class CommonUtils {
 		} else {
 			return currentProfanityLevel.getLevelName();
 		}
+	}
+
+	public boolean emptyCheck(String value) {
+		String str = value.replaceAll("(\r\n|\n|\r)", "").replaceAll("\\s+","");
+		return StringUtils.isEmpty(str);
 	}
 }

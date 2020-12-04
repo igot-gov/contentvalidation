@@ -1,5 +1,6 @@
 package com.eagle.contentvalidation.model;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,4 +27,5 @@ public class Profanity {
 
 	private List<ProfanityWordFrequency> possible_profanity_frequency;
 
+	private HashMap<String, ProfanityCategorial> possible_profanity_categorical;
 }

@@ -272,14 +272,22 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			pdfStripper.setAddMoreFormatting(false);
 			pdfStripper.setLineSeparator(" ");
 			String text = pdfStripper.getText(docPages.get(p));
-			if (!StringUtils.isEmpty(text)) {
+			if (!StringUtils.isEmpty(text) && !commonUtils.emptyCheck(text)) {
 				Profanity profanityResponse = getProfanityCheckForText(text);
 				if (log.isDebugEnabled()) {
 					log.debug("Page wise analysis PageNo: {}, Analysis: {}", p,
 							mapper.writeValueAsString(profanityResponse));
 				}
-				response.incrementTotalPages();
-				for (ProfanityWordFrequency wordFrequency : profanityResponse.getPossible_profanity_frequency()) {
+				for (Map.Entry<String, ProfanityCategorial> profanityCategorial : profanityResponse.getPossible_profanity_categorical().entrySet()) {
+					ProfanityCategorial categorial = profanityCategorial.getValue();
+					String category = "";
+					for (Map.Entry<String, String> details : categorial.getDetails().entrySet()) {
+						category = category + details.getKey() + " -> " + details.getValue() + " ";
+					}
+					ProfanityWordFrequency wordFrequency = new ProfanityWordFrequency();
+					wordFrequency.setWord(profanityCategorial.getKey());
+					wordFrequency.setNo_of_occurrence(categorial.getCount());
+					wordFrequency.setCategory(category);
 					wordFrequency.addPageOccurred(getPageNumberForIndex(p));
 					response.addProfanityWordFrequency(wordFrequency);
 					response.incrementProfanityWordCount();
@@ -294,6 +302,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 									profanityResponse.getOverall_text_classification().getClassification()));
 				}
 			}
+			response.incrementTotalPages();
 			long perPageTime = System.currentTimeMillis() - startTime;
 
 			if (log.isDebugEnabled()) {
