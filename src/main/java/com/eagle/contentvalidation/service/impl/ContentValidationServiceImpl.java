@@ -145,8 +145,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	 * 
 	 * @return Returns the validation details of the given PDF file
 	 */
-	public PdfDocValidationResponse validatePdfContent(ContentPdfValidation contentPdfValidation)
-			throws IOException {
+	public PdfDocValidationResponse validatePdfContent(ContentPdfValidation contentPdfValidation) throws IOException {
 		StringBuilder logStr = null;
 		if (log.isDebugEnabled()) {
 			logStr = new StringBuilder();
@@ -261,7 +260,8 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	private PdfDocValidationResponse performProfanityAnalysis(InputStream inputStream, String fileName,
 			String contentId) throws IOException {
 		PdfDocValidationResponse response = new PdfDocValidationResponse();
-		response.setPrimaryKey(PdfDocValidationResponsePrimaryKey.builder().contentId(contentId).pdfFileName(fileName).build());
+		response.setPrimaryKey(
+				PdfDocValidationResponsePrimaryKey.builder().contentId(contentId).pdfFileName(fileName).build());
 		PDDocument doc = PDDocument.load(inputStream);
 		Splitter splitter = new Splitter();
 		List<PDDocument> docPages = splitter.split(doc);
@@ -276,15 +276,15 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			String text = pdfStripper.getText(docPages.get(p));
 			if (!StringUtils.isEmpty(text) && !commonUtils.emptyCheck(text)) {
 				Profanity profanityResponse = getProfanityCheckForText(text);
-				if (log.isDebugEnabled()) {
-					log.debug("Page wise analysis PageNo: {}, Analysis: {}", p,
-							mapper.writeValueAsString(profanityResponse));
-				}
-				for (Map.Entry<String, ProfanityCategorial> profanityCategorial : profanityResponse.getPossible_profanity_categorical().entrySet()) {
+				log.debug("Page wise analysis PageNo: {}, Analysis: {}", p,
+						mapper.writeValueAsString(profanityResponse));
+				for (Map.Entry<String, ProfanityCategorial> profanityCategorial : profanityResponse
+						.getPossible_profanity_categorical().entrySet()) {
 					ProfanityCategorial categorial = profanityCategorial.getValue();
 					String category = "";
 					for (Map.Entry<String, String> details : categorial.getDetails().entrySet()) {
-						category = category + details.getKey() + " -> " + details.getValue() + " ";
+						category = details.getKey();
+						break;
 					}
 					ProfanityWordFrequency wordFrequency = new ProfanityWordFrequency();
 					wordFrequency.setWord(profanityCategorial.getKey());
@@ -343,6 +343,8 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				if (o instanceof PDImageXObject) {
 					response.incrementTotalPagesImages();
 					response.addImageOccurances(index);
+					// No need to continue the loop for the next image in the same page
+					break;
 				}
 			}
 		} catch (IOException e) {
