@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.eagle.contentvalidation.repo.PdfDocValidationRepository;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -65,6 +66,9 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 
 	@Autowired
 	private CommonUtils commonUtils;
+
+	@Autowired
+	private PdfDocValidationRepository pdfRepo;
 
 	/**
 	 * Get the profanity check list for pdf
@@ -158,6 +162,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			logStr.append("Time taken to download PDF File: ").append(System.currentTimeMillis() - startTime)
 					.append(" milliseconds");
 		}
+		enrichTotalPages(contentPdfValidation, inputStream);
 		String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
 		PdfDocValidationResponse response = performProfanityAnalysis(inputStream, fileName,
 				contentPdfValidation.getContentId());
@@ -304,7 +309,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 									profanityResponse.getOverall_text_classification().getClassification()));
 				}
 			}
-			response.incrementTotalPages();
+			response.incrementTotalNoOfPagesCompleted();
 			extractImagesAndUpdateThPdfeResponse(doc.getPages().get(p), p, response);
 			long perPageTime = System.currentTimeMillis() - startTime;
 
@@ -349,4 +354,35 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			log.error("Error occured : {}", e);
 		}
 	}
+
+	/**
+	 *
+	 * @param inputStream
+	 * @return
+	 */
+	private int getTotalNoOfPages(InputStream inputStream) {
+		int totalNoOfPages = 0;
+		PDDocument doc = null;
+		try {
+			doc = PDDocument.load(inputStream);
+			Splitter splitter = new Splitter();
+			totalNoOfPages = new Splitter().split(doc).size();
+		} catch (IOException e) {
+			log.error("Exception occurred while reading the pdf", e);
+		}
+		return totalNoOfPages;
+	}
+
+	/**
+	 *
+	 * @param contentPdfValidation
+	 * @param inputStream
+	 */
+	private void enrichTotalPages(ContentPdfValidation contentPdfValidation, InputStream inputStream) {
+		int totalNoOfPages = getTotalNoOfPages(inputStream);
+		PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentPdfValidation.getContentId(), contentPdfValidation.getPdfDownloadUrl());
+		pdfResponse.setTotal_pages(totalNoOfPages);
+		pdfRepo.save(pdfResponse);
+	}
+
 }

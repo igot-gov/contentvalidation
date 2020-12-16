@@ -1,6 +1,7 @@
 package com.eagle.contentvalidation.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -70,10 +71,9 @@ public class ContentValidationController {
 	}
 
 	@PostMapping(value = "/getPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<PdfDocValidationResponse> getContentPdfProfanity(
+	public ResponseEntity<List<PdfDocValidationResponse>> getContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) {
-		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(
-				contentPdfValidation.getContentId(), contentPdfValidation.getFileName()), HttpStatus.OK);
+		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(contentPdfValidation.getContentId()), HttpStatus.OK);
 	}
 
 	@PostMapping(value = "/startLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -84,9 +84,9 @@ public class ContentValidationController {
 	}
 
 	@PostMapping(value = "/getLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<PdfDocValidationResponse> getLocalContentPdfProfanity(
+	public ResponseEntity<List<PdfDocValidationResponse>> getLocalContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) {
 		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(
-				contentPdfValidation.getContentId(), contentPdfValidation.getFileName()), HttpStatus.OK);
+				contentPdfValidation.getContentId()), HttpStatus.OK);
 	}
 }

@@ -23,6 +23,9 @@ public class PdfDocValidationResponse {
 	@Column("isCompleted")
 	private boolean isCompleted;
 
+	@Column("no_of_pages_completed")
+	private Integer noOfPagesCompleted;
+
 	@Column("total_pages")
 	private Integer total_pages;
 
@@ -61,11 +64,11 @@ public class PdfDocValidationResponse {
 		profanityWordList.add(wordFrequency);
 	}
 
-	public void incrementTotalPages() {
-		if (total_pages == null) {
-			total_pages = 1;
+	public void incrementTotalNoOfPagesCompleted() {
+		if (noOfPagesCompleted == null) {
+			noOfPagesCompleted = 1;
 		} else {
-			total_pages++;
+			noOfPagesCompleted++;
 		}
 	}
 
