@@ -30,6 +30,7 @@ public class ContentValidationRepoServiceImpl {
 			pdfResponse.setScore(0.0);
 			pdfResponse.setTotal_page_images(0);
 			pdfResponse.setNoOfPagesCompleted(0);
+			pdfResponse.setTotal_pages(0);
 		} else {
 			pdfResponse = new PdfDocValidationResponse();
 			pdfResponse.setPrimaryKey(

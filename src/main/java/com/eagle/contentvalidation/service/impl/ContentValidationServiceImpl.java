@@ -359,32 +359,18 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 
 	/**
 	 *
-	 * @param inputStream
-	 * @return
-	 */
-	private int getTotalNoOfPages(InputStream inputStream) {
-		int totalNoOfPages = 0;
-		PDDocument doc = null;
-		try {
-			doc = PDDocument.load(inputStream);
-			Splitter splitter = new Splitter();
-			totalNoOfPages = new Splitter().split(doc).size();
-		} catch (IOException e) {
-			log.error("Exception occurred while reading the pdf", e);
-		}
-		return totalNoOfPages;
-	}
-
-	/**
-	 *
 	 * @param contentPdfValidation
 	 * @param inputStream
 	 */
 	private void enrichTotalPages(ContentPdfValidation contentPdfValidation, InputStream inputStream) {
-		int totalNoOfPages = getTotalNoOfPages(inputStream);
-		PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentPdfValidation.getContentId(), contentPdfValidation.getPdfDownloadUrl());
-		pdfResponse.setTotal_pages(totalNoOfPages);
-		pdfRepo.save(pdfResponse);
+		try {
+			int totalNoOfPages = new Splitter().split(PDDocument.load(inputStream)).size();
+			PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentPdfValidation.getContentId(), contentPdfValidation.getPdfDownloadUrl());
+			pdfResponse.setTotal_pages(totalNoOfPages);
+			pdfRepo.save(pdfResponse);
+		} catch (IOException e) {
+			log.error("Exception occurred while reading the pdf", e);
+		}
 	}
 
 }
