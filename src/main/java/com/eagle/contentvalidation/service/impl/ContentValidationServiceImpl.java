@@ -161,7 +161,6 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			logStr.append("Time taken to download PDF File: ").append(System.currentTimeMillis() - startTime)
 					.append(" milliseconds");
 		}
-		enrichTotalPages(contentPdfValidation, inputStream);
 		String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
 		PdfDocValidationResponse response = performProfanityAnalysis(inputStream, fileName,
 				contentPdfValidation.getContentId());
@@ -270,6 +269,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		PDDocument doc = PDDocument.load(inputStream);
 		Splitter splitter = new Splitter();
 		List<PDDocument> docPages = splitter.split(doc);
+		enrichTotalPages(contentId, fileName, docPages.size());
 		PDFTextStripper pdfStripper = null;
 		long totalTime = 0l;
 		double overAllClassification = 0.0;
@@ -357,18 +357,12 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		}
 	}
 
-	/**
-	 *
-	 * @param contentPdfValidation
-	 * @param inputStream
-	 */
-	private void enrichTotalPages(ContentPdfValidation contentPdfValidation, InputStream inputStream) {
+	private void enrichTotalPages(String contentId, String fileName, int size) {
 		try {
-			int totalNoOfPages = new Splitter().split(PDDocument.load(inputStream)).size();
-			PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentPdfValidation.getContentId(), contentPdfValidation.getFileName());
-			pdfResponse.setTotal_pages(totalNoOfPages);
+			PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentId, fileName);
+			pdfResponse.setTotal_pages(size);
 			pdfRepo.save(pdfResponse);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("Exception occurred while reading the pdf", e);
 		}
 	}
