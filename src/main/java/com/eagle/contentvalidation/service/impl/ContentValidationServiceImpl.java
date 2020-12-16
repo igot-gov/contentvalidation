@@ -365,7 +365,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	private void enrichTotalPages(ContentPdfValidation contentPdfValidation, InputStream inputStream) {
 		try {
 			int totalNoOfPages = new Splitter().split(PDDocument.load(inputStream)).size();
-			PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentPdfValidation.getContentId(), contentPdfValidation.getPdfDownloadUrl());
+			PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentPdfValidation.getContentId(), contentPdfValidation.getFileName());
 			pdfResponse.setTotal_pages(totalNoOfPages);
 			pdfRepo.save(pdfResponse);
 		} catch (IOException e) {
