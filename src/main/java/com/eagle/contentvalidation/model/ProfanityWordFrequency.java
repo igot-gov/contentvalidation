@@ -3,6 +3,7 @@ package com.eagle.contentvalidation.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.UserDefinedType;
 
@@ -12,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @UserDefinedType("profanity_word_frequency")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProfanityWordFrequency {
 
 	@Column("no_of_occurrence")
