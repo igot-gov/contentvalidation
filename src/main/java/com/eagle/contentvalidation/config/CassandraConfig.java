@@ -19,6 +19,7 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 	private int bodhiPort;
 
 	@Bean
+	@Override
 	public CassandraClusterFactoryBean cluster() {
 		CassandraClusterFactoryBean cluster = new CassandraClusterFactoryBean();
 		cluster.setContactPoints(bodhiContactPoints);

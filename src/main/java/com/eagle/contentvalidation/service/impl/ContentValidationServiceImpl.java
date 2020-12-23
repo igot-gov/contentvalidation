@@ -285,15 +285,11 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 						mapper.writeValueAsString(profanityResponse));
 				for (Map.Entry<String, ProfanityCategorial> profanityCategorial : profanityResponse
 						.getPossible_profanity_categorical().entrySet()) {
-					ProfanityCategorial categorial = profanityCategorial.getValue();
-					String category = "";
-					for (Map.Entry<String, String> details : categorial.getDetails().entrySet()) {
-						category = details.getKey();
-						break;
-					}
+					Map.Entry<String,String> details =  profanityCategorial.getValue().getDetails().entrySet().iterator().next();
+					String category = details.getKey();
 					ProfanityWordFrequency wordFrequency = new ProfanityWordFrequency();
 					wordFrequency.setWord(profanityCategorial.getKey());
-					wordFrequency.setNo_of_occurrence(categorial.getCount());
+					wordFrequency.setNo_of_occurrence(profanityCategorial.getValue().getCount());
 					wordFrequency.setCategory(category);
 					wordFrequency.addPageOccurred(getPageNumberForIndex(p));
 					response.addProfanityWordFrequency(wordFrequency);

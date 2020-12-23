@@ -52,14 +52,14 @@ public class PdfDocValidationResponse {
 
 	public void addProfanityWordFrequency(List<ProfanityWordFrequency> wordFrequencyList) {
 		if (profanityWordList == null || profanityWordList.isEmpty()) {
-			profanityWordList = new ArrayList<ProfanityWordFrequency>();
+			profanityWordList = new ArrayList<>();
 		}
 		profanityWordList.addAll(wordFrequencyList);
 	}
 
 	public void addProfanityWordFrequency(ProfanityWordFrequency wordFrequency) {
 		if (profanityWordList == null || profanityWordList.isEmpty()) {
-			profanityWordList = new ArrayList<ProfanityWordFrequency>();
+			profanityWordList = new ArrayList<>();
 		}
 		profanityWordList.add(wordFrequency);
 	}
@@ -92,7 +92,7 @@ public class PdfDocValidationResponse {
 		if (StringUtils.isEmpty(this.image_occurances)) {
 			this.image_occurances = String.valueOf(pageIndex+1);
 		} else {
-			this.image_occurances = this.image_occurances + ", " + String.valueOf(pageIndex+1);
+			this.image_occurances = this.image_occurances + ", " + (pageIndex+1);
 		}
 	}
 

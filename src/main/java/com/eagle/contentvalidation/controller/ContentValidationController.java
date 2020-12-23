@@ -35,39 +35,11 @@ public class ContentValidationController {
 	@Autowired
 	private ContentProviderRestHandlerService restHandler;
 
-	@GetMapping("/checkProfanity/{contentId}/{userId}")
-	public ResponseEntity<ProfanityResponseWrapper> checkContentProfanity(@RequestHeader("rootOrg") String rootOrg,
-			@RequestHeader("org") String org, @PathVariable("contentId") String contentId,
-			@PathVariable("userId") String userId) throws IOException {
-		// ProfanityResponseWrapper response =
-		// contentValidationService.validateContent(rootOrg, org, contentId, userId);
-		return new ResponseEntity<>(new ProfanityResponseWrapper(), HttpStatus.OK);
-	}
-
-	@PostMapping(value = "/checkPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<PdfDocValidationResponse> checkContentPdfProfanity(
-			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-		// PdfDocValidationResponse response = contentValidationService
-		// .validatePdfContent(mapper.convertValue(contentPdfValidation,
-		// ContentPdfValidation.class));
-		return new ResponseEntity<>(new PdfDocValidationResponse(), HttpStatus.OK);
-	}
-
-	@PostMapping(value = "/checkLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<PdfDocValidationResponse> checkLocalContentPdfProfanity(
-			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
-		// PdfDocValidationResponse response =
-		// contentValidationService.validateLocalPdfContent(contentPdfValidation);
-		return new ResponseEntity<>(new PdfDocValidationResponse(), HttpStatus.OK);
-	}
-
 	@PostMapping(value = "/startPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<ContentPdfValidationResponse> startContentPdfProfanity(
-			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
+			@RequestBody ContentPdfValidation contentPdfValidation){
 		restHandler.handleStartContentValidationRequest(contentPdfValidation);
-		return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(HttpStatus.ACCEPTED);
 	}
 
 	@PostMapping(value = "/getPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -78,9 +50,9 @@ public class ContentValidationController {
 
 	@PostMapping(value = "/startLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<ContentPdfValidationResponse> startLocalContentPdfProfanity(
-			@RequestBody ContentPdfValidation contentPdfValidation) throws IOException {
+			@RequestBody ContentPdfValidation contentPdfValidation){
 		restHandler.handleStartContentValidationRequest(contentPdfValidation);
-		return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(HttpStatus.ACCEPTED);
 	}
 
 	@PostMapping(value = "/getLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
