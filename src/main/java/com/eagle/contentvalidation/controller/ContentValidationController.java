@@ -43,7 +43,7 @@ public class ContentValidationController {
 				contentPdfValidation.getContentId(), contentPdfValidation.getFileName()), HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/getPdfProfanityForContent/{contentId}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@GetMapping(value = "/getPdfProfanityForContent/{contentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<PdfDocValidationResponse>> getContentPdfProfanity(@PathVariable("contentId") String contentId) {
 		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(contentId), HttpStatus.OK);
 	}
