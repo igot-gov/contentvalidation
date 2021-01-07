@@ -1,6 +1,14 @@
 package com.eagle.contentvalidation.repo;
 
+import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.model.contentsearch.model.SearchRequest;
+import com.eagle.contentvalidation.model.contentsearch.model.SearchResponse;
+import com.eagle.contentvalidation.model.contentsearch.model.ValidatedSearchData;
+import com.eagle.contentvalidation.service.impl.OutboundRequestHandlerServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.eagle.contentvalidation.repo.model.PdfDocValidationResponse;
@@ -8,13 +16,22 @@ import com.eagle.contentvalidation.repo.model.PdfDocValidationResponsePrimaryKey
 
 import lombok.extern.log4j.Log4j2;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @Log4j2
 public class ContentValidationRepoServiceImpl {
 	@Autowired
 	PdfDocValidationRepository pdfRepo;
+
+	@Autowired
+	private OutboundRequestHandlerServiceImpl requestHandlerService;
+
+	@Autowired
+	private Configuration configuration;
+
+	@Autowired
+	private ObjectMapper mapper;
 
 	public void insertStartData(String contentId, String fileName) {
 
@@ -64,7 +81,44 @@ public class ContentValidationRepoServiceImpl {
 		return pdfRepo.findProgressByContentIdAndPdfFileName(contentId, pdfFileName);
 	}
 
-	public List<PdfDocValidationResponse> getContentValidationResponse(String contentId){
-		return pdfRepo.findProgressByContentId(contentId);
+	public List<PdfDocValidationResponse> getContentValidationResponse(String rootOrg, String wid, String contentId){
+		return pdfRepo.findProgressByContentIds(getParentAndChildContentIds(rootOrg, wid, contentId));
+	}
+
+	public List<String> getParentAndChildContentIds(String rootOrg, String wid, String contentId) {
+		List<String> contentIds = new ArrayList<>();
+		ValidatedSearchData request = new ValidatedSearchData();
+		request.setUuid(UUID.fromString(wid));
+		request.setQuery(contentId);
+		request.setRootOrg(rootOrg);
+		request.setIsUserRecordEnabled(false);
+		request.setPageNo(0);
+		request.setPageSize(24);
+		request.setAggregationsSorting(null);
+		request.getFilters().setStatus(new ArrayList<>());
+		SearchRequest searchRequest = new SearchRequest();
+		searchRequest.setRequest(request);
+		try {
+			log.info("Request {}", mapper.writeValueAsString(searchRequest));
+			SearchResponse response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(configuration.getSbExtActorsModuleURL() + configuration.getSearchV5Path(), searchRequest), SearchResponse.class);
+			ArrayList<HashMap<String, Object>> result = (ArrayList<HashMap<String, Object>>) ((HashMap<String, Object>) response.getResult().get("response")).get("result");
+			log.info("Response {}", mapper.writeValueAsString(result));
+			if (result.stream().findFirst().isPresent()) {
+				HashMap<String, Object> firstResult = result.stream().findFirst().get();
+				if (((String) firstResult.get("mimeType")).equals("application/pdf"))
+					contentIds.add((String) firstResult.get("identifier"));
+				ArrayList<HashMap<String, Object>> children = (ArrayList<HashMap<String, Object>>) firstResult.get("children");
+				children.forEach(map -> {
+					if (((String) map.get("mimeType")).equals("application/pdf"))
+						contentIds.add((String) map.get("identifier"));
+				});
+
+			}
+			log.info("ContentIds {}", contentIds);
+		}
+		catch (JsonProcessingException e) {
+			log.error("Parsing error occured!");
+		}
+		return contentIds;
 	}
 }

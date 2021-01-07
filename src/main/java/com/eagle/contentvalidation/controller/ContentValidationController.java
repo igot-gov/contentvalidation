@@ -35,7 +35,7 @@ public class ContentValidationController {
 			@RequestBody ContentPdfValidation contentPdfValidation) {
 		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponseForFile(contentPdfValidation.getContentId(), contentPdfValidation.getFileName()), HttpStatus.OK);
 	}
-	
+
 	@PostMapping(value = "/getLocalPdfProfanity", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<PdfDocValidationResponse> getLocalContentPdfProfanity(
 			@RequestBody ContentPdfValidation contentPdfValidation) {
@@ -43,8 +43,8 @@ public class ContentValidationController {
 				contentPdfValidation.getContentId(), contentPdfValidation.getFileName()), HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/getPdfProfanityForContent/{contentId}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<List<PdfDocValidationResponse>> getContentPdfProfanity(@PathVariable("contentId") String contentId) {
-		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(contentId), HttpStatus.OK);
+	@GetMapping(value = "/getPdfProfanityForContent/{contentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<PdfDocValidationResponse>> getContentPdfProfanity(@RequestHeader("rootOrg") String rootOrg, @RequestHeader("wid") String wid, @PathVariable("contentId") String contentId) {
+		return new ResponseEntity<>(contentValidationRepoService.getContentValidationResponse(rootOrg, wid, contentId), HttpStatus.OK);
 	}
 }

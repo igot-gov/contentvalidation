@@ -33,4 +33,12 @@ public class Configuration {
 	
 	@Value("${kafka.topics.incoming.rest.validation}")
 	private String startContentValidationTopic;
+
+
+	@Value("${sb-ext.service.host}")
+	private String sbExtActorsModuleURL;
+
+	@Value("${sb-ext.searchv5.searchpath}")
+	private String searchV5Path;
+
 }

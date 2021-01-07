@@ -17,4 +17,7 @@ public interface PdfDocValidationRepository
 	@Query("select * from pdf_validation_response where content_id=?0")
 	public List<PdfDocValidationResponse> findProgressByContentId(String contentId);
 
+	@Query("select * from pdf_validation_response where content_id in (?0)")
+	public List<PdfDocValidationResponse> findProgressByContentIds(List<String> contentId);
+
 }
