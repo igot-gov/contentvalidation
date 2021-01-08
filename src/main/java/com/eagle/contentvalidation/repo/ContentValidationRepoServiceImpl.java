@@ -102,7 +102,7 @@ public class ContentValidationRepoServiceImpl {
 			log.info("Request {}", mapper.writeValueAsString(searchRequest));
 			SearchResponse response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(configuration.getSbExtActorsModuleURL() + configuration.getSearchV5Path(), searchRequest), SearchResponse.class);
 			ArrayList<HashMap<String, Object>> result = (ArrayList<HashMap<String, Object>>) ((HashMap<String, Object>) response.getResult().get("response")).get("result");
-			log.info("Response {}", mapper.writeValueAsString(result));
+			log.info("Response of search request {}", mapper.writeValueAsString(response));
 			if (result.stream().findFirst().isPresent()) {
 				HashMap<String, Object> firstResult = result.stream().findFirst().get();
 				if (((String) firstResult.get("mimeType")).equals("application/pdf"))
