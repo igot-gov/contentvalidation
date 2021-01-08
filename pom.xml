@@ -9,7 +9,7 @@
 		<version>2.1.17.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.eagle.contentvalidation</groupId>
+	<groupId>org.sunbird.contentvalidation</groupId>
 	<artifactId>content-validation-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>content-validation-service</name>
