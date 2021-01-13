@@ -94,7 +94,7 @@ public class ContentValidationRepoServiceImpl {
 			PdfDocValidationResponse resp = it.next();
 			String artifactUrl = contentIdResponse.get(resp.getPrimaryKey().getContentId());
 			if(artifactUrl == null || !artifactUrl.contains(resp.getPrimaryKey().getPdfFileName())) {
-				respList.remove(resp);
+				it.remove();
 			}
 		}
 		return respList;
