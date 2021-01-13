@@ -1,6 +1,7 @@
 package com.eagle.contentvalidation.repo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -8,9 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.eagle.contentvalidation.config.Configuration;
@@ -110,22 +109,18 @@ public class ContentValidationRepoServiceImpl {
 		return respList;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Map<String, String> getContentHierarchyDetails(String rootOrg, String contentId) throws Exception {
 		Map<String, String> contentIds = new HashMap<String, String>();
-		JSONObject request = new JSONObject();
-		JSONArray identifiers = new JSONArray();
-		identifiers.put(contentId);
-		request.put("identifier", identifiers);
-		JSONArray fields = new JSONArray();
-		for (String str : Constants.MINIMUL_FIELDS) {
-			fields.put(str);
-		}
-		request.put("fields", fields);
-
+		
+		Map<String, Object> requestObj = new HashMap<String, Object>();
+		requestObj.put("identifier", Arrays.asList(contentId));
+		requestObj.put("fields", Constants.MINIMUL_FIELDS);
+		
 		StringBuilder url = new StringBuilder();
 		url.append(configuration.getAuthToolServiceHost()).append(configuration.getAuthToolServicePath());
 		url.append("?rootOrg=").append(rootOrg);
-		List<Map<String, Object>> response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), mapper.writeValueAsString(request)),
+		List<Map<String, Object>> response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), requestObj),
 				List.class);
 		if (response.size() > 0) {
 			Map<String, Object> content = (Map<String, Object>) response.get(0);
