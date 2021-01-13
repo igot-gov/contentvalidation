@@ -8,9 +8,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.eagle.contentvalidation.config.Configuration;
+import com.eagle.contentvalidation.config.Constants;
 import com.eagle.contentvalidation.model.contentsearch.model.SearchRequest;
 import com.eagle.contentvalidation.model.contentsearch.model.SearchResponse;
 import com.eagle.contentvalidation.model.contentsearch.model.ValidatedSearchData;
@@ -85,19 +89,68 @@ public class ContentValidationRepoServiceImpl {
 		return pdfRepo.findProgressByContentIdAndPdfFileName(contentId, pdfFileName);
 	}
 
-	public List<PdfDocValidationResponse> getContentValidationResponse(String rootOrg, String wid, String contentId){
-		Map<String, String> contentIdResponse = getParentAndChildContentIds(rootOrg, wid, contentId);
+	public List<PdfDocValidationResponse> getContentValidationResponse(String rootOrg, String wid, String contentId) {
+//		Map<String, String> contentIdResponse = getParentAndChildContentIds(rootOrg, wid, contentId);
+		Map<String, String> contentIdResponse = new HashMap<String, String>();
+		try {
+			contentIdResponse = getContentHierarchyDetails(rootOrg, contentId);
+		} catch (JSONException e) {
+			log.error(e);
+		}
 		List<String> contentIds = new ArrayList<String>(contentIdResponse.keySet());
 		List<PdfDocValidationResponse> respList = pdfRepo.findProgressByContentIds(contentIds);
 		Iterator<PdfDocValidationResponse> it = respList.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			PdfDocValidationResponse resp = it.next();
 			String artifactUrl = contentIdResponse.get(resp.getPrimaryKey().getContentId());
-			if(artifactUrl == null || !artifactUrl.contains(resp.getPrimaryKey().getPdfFileName())) {
+			if (artifactUrl == null || !artifactUrl.contains(resp.getPrimaryKey().getPdfFileName())) {
 				it.remove();
 			}
 		}
 		return respList;
+	}
+
+	private Map<String, String> getContentHierarchyDetails(String rootOrg, String contentId) throws JSONException {
+		Map<String, String> contentIds = new HashMap<String, String>();
+		JSONObject request = new JSONObject();
+		JSONArray identifiers = new JSONArray();
+		identifiers.put(contentId);
+		request.put("identifier", identifiers);
+		JSONArray fields = new JSONArray();
+		for (String str : Constants.MINIMUL_FIELDS) {
+			fields.put(str);
+		}
+		request.put("fields", fields);
+
+		StringBuilder url = new StringBuilder();
+		url.append(configuration.getAuthToolServiceHost()).append(configuration.getAuthToolServicePath());
+		url.append("?rootOrg=").append(rootOrg);
+		JSONArray response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), request),
+				JSONArray.class);
+		if (response.length() > 0) {
+			JSONObject content = response.getJSONObject(0);
+			processResponse(contentIds, content);
+		}
+
+		return contentIds;
+	}
+
+	private Map<String, String> processResponse(Map<String, String> contentIds, JSONObject jObject)
+			throws JSONException {
+		if ("application/pdf".equalsIgnoreCase((String) jObject.get("mimeType"))) {
+			String cId = (String) jObject.get("identifier");
+			String aUrl = (String) jObject.get("artifactUrl");
+			if (cId != null && aUrl != null) {
+				contentIds.put(cId, aUrl);
+			}
+			JSONArray childs = (JSONArray) jObject.get("children");
+			if (childs != null && childs.length() > 1) {
+				for (int i = 0; i < childs.length(); i++) {
+					processResponse(contentIds, (JSONObject) childs.get(0));
+				}
+			}
+		}
+		return contentIds;
 	}
 
 	public Map<String, String> getParentAndChildContentIds(String rootOrg, String wid, String contentId) {

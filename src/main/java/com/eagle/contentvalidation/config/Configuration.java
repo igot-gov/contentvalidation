@@ -46,5 +46,11 @@ public class Configuration {
 
 	@Value("${sb-ext.searchv5.searchpath}")
 	private String searchV5Path;
+	
+	@Value("${auth.tool.service.host}")
+	private String authToolServiceHost;
+	
+	@Value("${auth.tool.service.path}")
+	private String authToolServicePath;
 
 }
