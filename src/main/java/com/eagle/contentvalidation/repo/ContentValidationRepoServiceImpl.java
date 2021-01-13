@@ -94,7 +94,7 @@ public class ContentValidationRepoServiceImpl {
 		Map<String, String> contentIdResponse = new HashMap<String, String>();
 		try {
 			contentIdResponse = getContentHierarchyDetails(rootOrg, contentId);
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			log.error(e);
 		}
 		List<String> contentIds = new ArrayList<String>(contentIdResponse.keySet());
@@ -110,7 +110,7 @@ public class ContentValidationRepoServiceImpl {
 		return respList;
 	}
 
-	private Map<String, String> getContentHierarchyDetails(String rootOrg, String contentId) throws JSONException {
+	private Map<String, String> getContentHierarchyDetails(String rootOrg, String contentId) throws Exception {
 		Map<String, String> contentIds = new HashMap<String, String>();
 		JSONObject request = new JSONObject();
 		JSONArray identifiers = new JSONArray();
@@ -125,29 +125,30 @@ public class ContentValidationRepoServiceImpl {
 		StringBuilder url = new StringBuilder();
 		url.append(configuration.getAuthToolServiceHost()).append(configuration.getAuthToolServicePath());
 		url.append("?rootOrg=").append(rootOrg);
-		JSONArray response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), request),
-				JSONArray.class);
-		if (response.length() > 0) {
-			JSONObject content = response.getJSONObject(0);
+		List<Map<String, Object>> response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), mapper.writeValueAsString(request)),
+				List.class);
+		if (response.size() > 0) {
+			Map<String, Object> content = (Map<String, Object>) response.get(0);
 			processResponse(contentIds, content);
 		}
 
 		return contentIds;
 	}
 
-	private Map<String, String> processResponse(Map<String, String> contentIds, JSONObject jObject)
+	@SuppressWarnings("unchecked")
+	private Map<String, String> processResponse(Map<String, String> contentIds, Map<String, Object> response)
 			throws JSONException {
-		if ("application/pdf".equalsIgnoreCase((String) jObject.get("mimeType"))) {
-			String cId = (String) jObject.get("identifier");
-			String aUrl = (String) jObject.get("artifactUrl");
+		if ("application/pdf".equalsIgnoreCase((String) response.get("mimeType"))) {
+			String cId = (String) response.get("identifier");
+			String aUrl = (String) response.get("artifactUrl");
 			if (cId != null && aUrl != null) {
 				contentIds.put(cId, aUrl);
 			}
-			JSONArray childs = (JSONArray) jObject.get("children");
-			if (childs != null && childs.length() > 1) {
-				for (int i = 0; i < childs.length(); i++) {
-					processResponse(contentIds, (JSONObject) childs.get(0));
-				}
+		}
+		List<Map<String, Object>> childList = (List<Map<String, Object>>) response.get("children");
+		if(childList != null) {
+			for(Map<String, Object> child : childList) {
+				processResponse(contentIds, child);
 			}
 		}
 		return contentIds;
