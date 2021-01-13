@@ -120,8 +120,8 @@ public class ContentValidationRepoServiceImpl {
 		StringBuilder url = new StringBuilder();
 		url.append(configuration.getAuthToolServiceHost()).append(configuration.getAuthToolServicePath());
 		url.append("?rootOrg=").append(rootOrg);
-		List<Map<String, Object>> response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), requestObj),
-				List.class);
+		Map<String, Object> response = mapper.convertValue(requestHandlerService.fetchResultUsingPost(url.toString(), requestObj),
+				Map.class);
 		if (response.size() > 0) {
 			Map<String, Object> content = (Map<String, Object>) response.get(0);
 			processResponse(contentIds, content);
