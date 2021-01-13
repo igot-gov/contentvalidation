@@ -146,7 +146,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 
 	public Map<String, String> getProfanityCheckForImage(String fileName, File imageFile) {
 		StringBuilder url = new StringBuilder();
-		url.append(configuration.getProfanityImageServicePath()).append(configuration.getProfanityImageServicePath());
+		url.append(configuration.getProfanityImageServiceHost()).append(configuration.getProfanityImageServicePath());
 		Object response = outboundRequestHandlerService.fetchResultsForImages(url.toString(), imageFile, fileName);
 		return mapper.convertValue(response, Map.class);
 	}
