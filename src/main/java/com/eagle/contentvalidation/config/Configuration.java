@@ -18,9 +18,15 @@ public class Configuration {
 
 	@Value("${profanity.service.host}")
 	private String profanityServiceHost;
-
+	
 	@Value("${profanity.service.path}")
 	private String profanityServicePath;
+	
+	@Value("${profanity.image.service.host}")
+	private String profanityImageServiceHost;
+	
+	@Value("${profanity.image.service.path}")
+	private String profanityImageServicePath;
 
 	@Value("${lexcore.service.host}")
 	private String lexCoreServiceHost;

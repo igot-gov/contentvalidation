@@ -3,6 +3,7 @@ package com.eagle.contentvalidation.service.impl;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -11,8 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.eagle.contentvalidation.repo.PdfDocValidationRepository;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -36,6 +37,7 @@ import com.eagle.contentvalidation.model.ProfanityResponseWrapper;
 import com.eagle.contentvalidation.model.ProfanityWordCount;
 import com.eagle.contentvalidation.model.ProfanityWordFrequency;
 import com.eagle.contentvalidation.repo.ContentValidationRepoServiceImpl;
+import com.eagle.contentvalidation.repo.PdfDocValidationRepository;
 import com.eagle.contentvalidation.repo.model.PdfDocValidationResponse;
 import com.eagle.contentvalidation.repo.model.PdfDocValidationResponsePrimaryKey;
 import com.eagle.contentvalidation.service.ContentProviderService;
@@ -140,6 +142,13 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		url.append(configuration.getProfanityServiceHost()).append(configuration.getProfanityServicePath());
 		Object response = outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestObject);
 		return mapper.convertValue(response, Profanity.class);
+	}
+
+	public Map<String, String> getProfanityCheckForImage(String fileName, File imageFile) {
+		StringBuilder url = new StringBuilder();
+		url.append(configuration.getProfanityImageServicePath()).append(configuration.getProfanityImageServicePath());
+		Object response = outboundRequestHandlerService.fetchResultsForImages(url.toString(), imageFile, fileName);
+		return mapper.convertValue(response, Map.class);
 	}
 
 	/**
@@ -285,7 +294,8 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 						mapper.writeValueAsString(profanityResponse));
 				for (Map.Entry<String, ProfanityCategorial> profanityCategorial : profanityResponse
 						.getPossible_profanity_categorical().entrySet()) {
-					Map.Entry<String,String> details =  profanityCategorial.getValue().getDetails().entrySet().iterator().next();
+					Map.Entry<String, String> details = profanityCategorial.getValue().getDetails().entrySet()
+							.iterator().next();
 					String category = details.getKey();
 					ProfanityWordFrequency wordFrequency = new ProfanityWordFrequency();
 					wordFrequency.setWord(profanityCategorial.getKey());
@@ -306,7 +316,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				}
 			}
 			response.incrementTotalNoOfPagesCompleted();
-			extractImagesAndUpdateThPdfeResponse(doc.getPages().get(p), p, response);
+			extractImagesAndUpdateThPdfeResponse(fileName, doc.getPages().get(p), p, response);
 			long perPageTime = System.currentTimeMillis() - startTime;
 
 			if (log.isDebugEnabled()) {
@@ -335,8 +345,10 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	 * @param index
 	 * @param response
 	 */
-	private void extractImagesAndUpdateThPdfeResponse(PDPage page, int index, PdfDocValidationResponse response) {
+	private void extractImagesAndUpdateThPdfeResponse(String fileName, PDPage page, int index,
+			PdfDocValidationResponse response) {
 		PDResources resources = page.getResources();
+		int count = 0;
 		try {
 			for (COSName name : resources.getXObjectNames()) {
 				PDXObject o = null;
@@ -344,6 +356,13 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				if (o instanceof PDImageXObject) {
 					response.incrementTotalPagesImages();
 					response.addImageOccurances(index);
+					PDImageXObject image = (PDImageXObject) o;
+					File f = File.createTempFile(fileName + "_" + index + "_", Integer.toString(count++) + ".png");
+					FileOutputStream out = new FileOutputStream(f);
+					IOUtils.copy(image.createInputStream(), out);
+					log.info("---------------------------- Image Result -------------------------------");
+					log.info("FileName : " + f.getName());
+					log.info("" + getProfanityCheckForImage(f.getName(), f));
 					// No need to continue the loop for the next image in the same page
 					break;
 				}
