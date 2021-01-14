@@ -42,15 +42,15 @@ public class OutboundRequestHandlerServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object fetchResultUsingPost(String uri, Object request) {
+	public Object fetchResultUsingPost(String uri, Object request, Class classType) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-			response = restTemplate.postForObject(uri, entity, Map.class);
-			if (log.isDebugEnabled()) {
+			response = restTemplate.postForObject(uri, entity, classType);
+//			if (log.isDebugEnabled()) {
 				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
 						.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
 				str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
@@ -58,14 +58,18 @@ public class OutboundRequestHandlerServiceImpl {
 						.append(System.lineSeparator());
 				str.append(Constants.RESPONSE_CONSTANT).append(mapper.writeValueAsString(response))
 						.append(System.lineSeparator());
-				log.debug(str.toString());
-			}
+				log.info(str.toString());
+//			}
 		} catch (HttpClientErrorException e) {
 			log.error(Constants.SERVICE_ERROR_CONSTANT, e);
 		} catch (Exception e) {
 			log.error(Constants.EXTERNAL_SERVICE_ERROR_CODE, e);
 		}
 		return response;
+	}
+	
+	public Object fetchResultUsingPost(String uri, Object request) {
+		return fetchResultUsingPost(uri, request, Map.class);
 	}
 
 	/**
@@ -153,7 +157,7 @@ public class OutboundRequestHandlerServiceImpl {
 
 			RestTemplate restTemplate = new RestTemplate(Arrays.asList(jackson, resource, formHttpMessageConverter));
 
-			log.info("Request --> " + requestEntity);
+			log.info("URL -> " + uri + ", Request --> " + requestEntity);
 
 			response = restTemplate.postForEntity(uri, requestEntity, Map.class);
 
