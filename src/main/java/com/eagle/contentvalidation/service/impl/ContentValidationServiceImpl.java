@@ -356,13 +356,13 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				if (o instanceof PDImageXObject) {
 					response.incrementTotalPagesImages();
 					response.addImageOccurances(index);
-					PDImageXObject image = (PDImageXObject) o;
-					File f = File.createTempFile(fileName + "_" + index + "_", Integer.toString(count++) + ".png");
-					FileOutputStream out = new FileOutputStream(f);
-					IOUtils.copy(image.createInputStream(), out);
-					log.info("---------------------------- Image Result -------------------------------");
-					log.info("FileName : " + f.getName());
-					log.info("" + getProfanityCheckForImage(f.getName(), f));
+//					PDImageXObject image = (PDImageXObject) o;
+//					File f = File.createTempFile(fileName + "_" + index + "_", Integer.toString(count++) + ".png");
+//					FileOutputStream out = new FileOutputStream(f);
+//					IOUtils.copy(image.createInputStream(), out);
+//					log.info("---------------------------- Image Result -------------------------------");
+//					log.info("FileName : " + f.getName());
+//					log.info("" + getProfanityCheckForImage(f.getName(), f));
 					// No need to continue the loop for the next image in the same page
 					break;
 				}
