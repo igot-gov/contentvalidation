@@ -50,7 +50,7 @@ public class OutboundRequestHandlerServiceImpl {
 			HttpHeaders headers = new HttpHeaders();
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
 			response = restTemplate.postForObject(uri, entity, classType);
-//			if (log.isDebugEnabled()) {
+			if (log.isDebugEnabled()) {
 				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
 						.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
 				str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
@@ -58,8 +58,8 @@ public class OutboundRequestHandlerServiceImpl {
 						.append(System.lineSeparator());
 				str.append(Constants.RESPONSE_CONSTANT).append(mapper.writeValueAsString(response))
 						.append(System.lineSeparator());
-				log.info(str.toString());
-//			}
+				log.debug(str.toString());
+			}
 		} catch (HttpClientErrorException e) {
 			log.error(Constants.SERVICE_ERROR_CONSTANT, e);
 		} catch (Exception e) {
