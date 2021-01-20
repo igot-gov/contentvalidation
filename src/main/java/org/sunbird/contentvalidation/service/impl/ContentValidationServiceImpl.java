@@ -161,7 +161,8 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			logStr.append("Time taken to download PDF File: ").append(System.currentTimeMillis() - startTime)
 					.append(" milliseconds");
 		}
-		String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
+		//String fileName = contentPdfValidation.getPdfDownloadUrl().split("artifacts%2F")[1];
+		String fileName = contentPdfValidation.getPdfDownloadUrl().split("/")[7];
 		PdfDocValidationResponse response = performProfanityAnalysis(inputStream, fileName,
 				contentPdfValidation.getContentId());
 		if (logStr != null) {
