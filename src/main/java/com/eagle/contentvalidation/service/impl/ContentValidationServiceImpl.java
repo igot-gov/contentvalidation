@@ -3,7 +3,6 @@ package com.eagle.contentvalidation.service.impl;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -12,8 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -356,13 +356,14 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				if (o instanceof PDImageXObject) {
 					response.incrementTotalPagesImages();
 					response.addImageOccurances(index);
-//					PDImageXObject image = (PDImageXObject) o;
-//					File f = File.createTempFile(fileName + "_" + index + "_", Integer.toString(count++) + ".png");
-//					FileOutputStream out = new FileOutputStream(f);
-//					IOUtils.copy(image.createInputStream(), out);
-//					log.info("---------------------------- Image Result -------------------------------");
-//					log.info("FileName : " + f.getName());
-//					log.info("" + getProfanityCheckForImage(f.getName(), f));
+					PDImageXObject image = (PDImageXObject) o;
+					File f = File.createTempFile(fileName + "_" + index + "_", Integer.toString(count++) + ".png");
+					ImageIO.write(image.getImage(), "png", f);
+					log.info("---------------------------- Image Result -------------------------------");
+					log.info("FileName : " + f.getName());
+					log.info("" + getProfanityCheckForImage(f.getName(), f));
+					// TODO - Need to process the response properly and store it in
+					// PdfDocValidationResponse
 					// No need to continue the loop for the next image in the same page
 					break;
 				}
