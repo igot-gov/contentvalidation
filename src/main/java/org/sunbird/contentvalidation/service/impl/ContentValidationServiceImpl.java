@@ -262,7 +262,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		}
 	}
 
-	private PdfDocValidationResponse performProfanityAnalysis(InputStream inputStream, String fileName,
+	public PdfDocValidationResponse performProfanityAnalysis(InputStream inputStream, String fileName,
 			String contentId) throws IOException {
 		PdfDocValidationResponse response = new PdfDocValidationResponse();
 		response.setPrimaryKey(
@@ -354,7 +354,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		}
 	}
 
-	private void enrichTotalPages(String contentId, String fileName, int size) {
+	public void enrichTotalPages(String contentId, String fileName, int size) {
 		try {
 			PdfDocValidationResponse pdfResponse = pdfRepo.findProgressByContentIdAndPdfFileName(contentId, fileName);
 			pdfResponse.setTotal_pages(size);
